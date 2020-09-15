@@ -25,6 +25,24 @@ namespace StopCovidBot.Models
             }
         }
 
+        public static string GetSitesInfo()
+        {
+            try
+            {
+                using (FileStream f = new FileStream("Resources/otherInfo.txt", FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    var sr = new StreamReader(f, Encoding.UTF8);
+                    return sr.ReadToEnd();
+                }
+            }
+            catch
+            {
+                return string.Format("Sorry, info not found");
+            }
+        }
+
+    
+
         public static string GetSympCovid()
         {
             try

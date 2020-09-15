@@ -21,6 +21,9 @@
     <None Update="Resources\info.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\otherInfo.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\prof.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

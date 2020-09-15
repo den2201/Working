@@ -37,7 +37,8 @@ namespace StopCovidBot
                                 new[] {InlineKeyboardButton.WithCallbackData("Профилактика","profil") },
                                 new[] {InlineKeyboardButton.WithCallbackData(string.Format("Статистика по миру на сегодня"),"statAll") },
                                 new[] {InlineKeyboardButton.WithCallbackData(string.Format("Статистика по России на сегодня"),"statRU") },
-                                new[] {InlineKeyboardButton.WithCallbackData(string.Format("Остальные страны"),"statOther") }
+                                new[] {InlineKeyboardButton.WithCallbackData(string.Format("Остальные страны"),"statOther") },
+                                new[] {InlineKeyboardButton.WithCallbackData(string.Format("Сайты и телефоны"),"sites") }
                            });
         }
                                
@@ -45,22 +46,26 @@ namespace StopCovidBot
         {
             Task.Run(() =>
             {
+                long ChatId = e.CallbackQuery.Message.Chat.Id;
                 DeleteLastMessageInChat(e.CallbackQuery.Message.Chat.Id);
                 Task<Telegram.Bot.Types.Message> message=null;
                 if (e.CallbackQuery.Data == "info")
                 {
                      message = bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, CovidInfo.GetInfoCovid());
-                    Thread.Sleep(1000);
+                    bot.SendTextMessageAsync(ChatId, string.Empty, replyMarkup: keyboard);
                 }
                 if (e.CallbackQuery.Data == "symptoms")
                 {
+                    
                     message = bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, CovidInfo.GetSympCovid());
-                    Thread.Sleep(1000);
+                    bot.SendTextMessageAsync(ChatId, "Выберите действие", replyMarkup: keyboard);
+
                 }
-               
                 if (e.CallbackQuery.Data == "profil")
                 {
+
                    message = bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, CovidInfo.GetProfCovid());
+                   bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, string.Empty, replyMarkup: keyboard);
                 }
                 if (e.CallbackQuery.Data == "statAll")
                 {
@@ -73,10 +78,13 @@ namespace StopCovidBot
                 if (e.CallbackQuery.Data == "statOther")
                 {
                     bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, e.CallbackQuery.Message.Chat.FirstName + ", для вывода информации введи #+код страны (#UA)");
-                    bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id,  CovidInfo.GetCountriesCodes());
+                    //bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, string.Format($"{e.CallbackQuery.Message.Chat.FirstName}, для вывода информации введи #+код страны (#UA) \n\n {CovidInfo.GetCountriesCodes()}"));
                 }
-                SetLastMessageIdInDictionaty(e.CallbackQuery.Message.Chat.Id, message.Id);
-                bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, string.Empty, replyMarkup: keyboard);
+                if (e.CallbackQuery.Data == "sites")
+                {
+                   bot.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, CovidInfo.GetSitesInfo());
+                }
+
             });
            
         }
@@ -109,18 +117,23 @@ namespace StopCovidBot
         {
             string senderName = e.Message.Chat.FirstName;
             Task<Telegram.Bot.Types.Message> message = null;
+
+            Console.WriteLine($"{DateTime.Now}  - {e.Message.Chat.FirstName}");
             Task.Run(() =>
             {
-                if(e.Message.Text[0]=='#')
+                if (e.Message.Text[0] == '#')
                 {
-                  message =  bot.SendTextMessageAsync(e.Message.Chat.Id, CovidInfo.GetStatCovidCountryToday(e.Message.Text.Substring(1)));
+                    message = bot.SendTextMessageAsync(e.Message.Chat.Id, CovidInfo.GetStatCovidCountryToday(e.Message.Text.Substring(1)));
                 }
+                else
+                {
 
-                if ((e.Message.Text.ToLower() == "привет") || (e.Message.Text.ToLower() == "hello"))
-                {
-                    message = bot.SendTextMessageAsync(e.Message.Chat.Id, $"Привет, {senderName}");
+                    if ((e.Message.Text.ToLower() == "привет") || (e.Message.Text.ToLower() == "hello"))
+                    {
+                        message = bot.SendTextMessageAsync(e.Message.Chat.Id, $"Привет, {senderName}");
+                    }
+                    bot.SendTextMessageAsync(e.Message.Chat.Id, "Обновление информации по статистике происходит 1 раз в сутки и может немного отличаться от других иточников", replyMarkup: keyboard);
                 }
-                  bot.SendTextMessageAsync(e.Message.Chat.Id, "Выбери действие", replyMarkup: keyboard);
             });
         }
     }
